@@ -83,18 +83,20 @@ module Packable
       end
 
       def pack_and_write(*arg)
-        original_pos = pos
-        Packable::Packers.to_object_option_list(*arg).each do |obj, options|
-          if options[:write_packed]
-            options[:write_packed].bind(obj).call(self)
-          else
-            obj.write_packed(self, options)
+        begin
+          original_pos = pos
+          Packable::Packers.to_object_option_list(*arg).each do |obj, options|
+            if options[:write_packed]
+              options[:write_packed].bind(obj).call(self)
+            else
+              obj.write_packed(self, options)
+            end
           end
+          pos - original_pos
+        rescue => e
+          write_without_packing(*arg)
         end
-        pos - original_pos
       end
-
-
     end
   end
 end
